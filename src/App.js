@@ -1,25 +1,63 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
+import React, { useState, useEffect } from "react";
+import { fetch } from "./client";
 
-function App() {
+import { Icon } from "leaflet";
+
+const customIcon = new Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/447/447031.png",
+  iconSize: [38, 38],
+});
+
+export default function App() {
+  const [pointData, setPointData] = useState([]);
+  const [polygonData, setPolygonData] = useState([]);
+  const [selectedFeature, setSelectedFeature] = useState(null);
+
+  const handleFeatureClick = (feature) => {
+    setSelectedFeature(feature);
+  };
+  useEffect(() => {
+    const points = fetch("points");
+    const polygons = fetch("polygons");
+    console.log("polygons", polygons);
+    setPointData(points);
+    setPolygonData(polygons);
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <MapContainer center={[12.9716, 77.5946]} zoom={13} style={{ zIndex: 0 }}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {pointData.map((marker) => (
+          <Marker key={marker.id} position={marker.geocode} icon={customIcon}>
+            <Popup>{marker.name}</Popup>
+          </Marker>
+        ))}
+
+        {polygonData.map((polygon) => (
+          <Polygon
+            key={polygon.id}
+            positions={polygon.coordinates}
+            eventHandlers={{ click: () => handleFeatureClick(polygon) }}
+          >
+            <Popup>{polygon.area}</Popup>
+          </Polygon>
+        ))}
+      </MapContainer>
+      {selectedFeature && (
+        <div className="description-container">
+          <p>
+            <span className="bold">Area:</span>
+            {selectedFeature.area}
+          </p>
+          <p className="description">{selectedFeature.details}</p>
+        </div>
+      )}
+    </>
   );
 }
-
-export default App;
