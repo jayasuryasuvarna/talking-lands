@@ -1,9 +1,8 @@
 import "./App.css";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import { fetch } from "./client";
-
 import { Icon } from "leaflet";
 
 const customIcon = new Icon({
